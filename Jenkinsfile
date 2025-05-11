@@ -13,11 +13,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Christian-Bohorquez/Backend_Ventas-API.git'
-            }
-        }
 
         stage('Build') {
             steps {
