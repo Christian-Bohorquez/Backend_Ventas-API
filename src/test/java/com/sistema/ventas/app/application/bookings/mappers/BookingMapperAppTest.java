@@ -7,6 +7,7 @@ import com.sistema.ventas.app.domain.bookings.enums.BookingStatus;
 import com.sistema.ventas.app.domain.bookings.models.Booking;
 import com.sistema.ventas.app.domain.clients.models.Client;
 import com.sistema.ventas.app.domain.routes.models.Route;
+import com.sistema.ventas.app.domain.shared.exceptions.BusinessRuleViolationException;
 import com.sistema.ventas.app.domain.shared.valueobjects.Name;
 import com.sistema.ventas.app.domain.shared.valueobjects.Price;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -35,74 +37,77 @@ class BookingMapperAppTest {
     }
 
     @Test
-    void toBooking_CreatesBookingSuccessfully() {
+    void toBooking_CreatesBookingSuccessfully() throws Exception {
         // Arrange
-        BookingCreateDto dto = mock(BookingCreateDto.class);
-        when(dto.getClientId()).thenReturn(UUID.randomUUID()); // Este campo es obligatorio
-        when(dto.getBookingDate()).thenReturn(java.sql.Date.valueOf(LocalDate.now())); // Fecha válida
-        when(dto.getBookingTime()).thenReturn(LocalTime.now());
-        when(dto.getNumberOfPeople()).thenReturn(3);
+        BookingCreateDto dto = new BookingCreateDto();
 
-        // Usamos lenient para los mocks que no estamos utilizando explícitamente
+        Field clientIdField = BookingCreateDto.class.getDeclaredField("clientId");
+        clientIdField.setAccessible(true);
+        UUID clientId = UUID.randomUUID();
+        clientIdField.set(dto, clientId);
+
+        Field dateField = BookingCreateDto.class.getDeclaredField("bookingDate");
+        dateField.setAccessible(true);
+        dateField.set(dto, java.sql.Date.valueOf(LocalDate.now()));
+
+        Field timeField = BookingCreateDto.class.getDeclaredField("bookingTime");
+        timeField.setAccessible(true);
+        timeField.set(dto, LocalTime.of(10, 0));
+
+        Field peopleField = BookingCreateDto.class.getDeclaredField("numberOfPeople");
+        peopleField.setAccessible(true);
+        peopleField.set(dto, 3);
+
+        Price price = Price.create(10.0);
         Route route = mock(Route.class);
-        lenient().when(route.getPrice()).thenReturn(mock(Price.class));
-        lenient().when(route.getId()).thenReturn(UUID.randomUUID());
-        lenient().when(route.getStartLocation()).thenReturn("City A");
-        lenient().when(route.getEndLocation()).thenReturn("City B");
+        when(route.getPrice()).thenReturn(price);
 
-        // Mock del BookingMapperApp para simular la creación de Booking
-        BookingMapperApp bookingMapperApp = mock(BookingMapperApp.class);
-
-        // Simular la creación de un Booking a través de toBooking
-        Booking expectedBooking = mock(Booking.class);
-        when(bookingMapperApp.toBooking(dto, route)).thenReturn(expectedBooking);
 
         // Act
         Booking booking = bookingMapperApp.toBooking(dto, route);
 
         // Assert
         assertNotNull(booking);
-        assertEquals(expectedBooking, booking);
-        assertEquals(dto.getClientId(), booking.getClientId());
+        assertEquals(clientId, booking.getClientId());
+        assertEquals(3, booking.getNumberOfPeople());
+        assertEquals(30.0, booking.getTotalPrice());
         assertEquals(route, booking.getRoute());
-        assertEquals(dto.getNumberOfPeople(), booking.getNumberOfPeople());
     }
+
 
 
 
     @Test
-    void toBooking_HandlesNullValues() {
+    void toBooking_InvalidPeopleCount_ThrowsBusinessRuleViolationException() throws Exception {
         // Arrange
-        BookingCreateDto dto = mock(BookingCreateDto.class);
-        when(dto.getClientId()).thenReturn(null);
-        when(dto.getBookingDate()).thenReturn(java.sql.Date.valueOf(LocalDate.now())); // Proporciona una fecha válida
-        when(dto.getBookingTime()).thenReturn(LocalTime.now()); // Establece una hora válida
-        when(dto.getNumberOfPeople()).thenReturn(0);
+        BookingCreateDto dto = new BookingCreateDto();
 
+        Field clientIdField = BookingCreateDto.class.getDeclaredField("clientId");
+        clientIdField.setAccessible(true);
+        clientIdField.set(dto, UUID.randomUUID()); // No null, para que pase esa validación
+
+        Field dateField = BookingCreateDto.class.getDeclaredField("bookingDate");
+        dateField.setAccessible(true);
+        dateField.set(dto, java.sql.Date.valueOf(LocalDate.now()));
+
+        Field timeField = BookingCreateDto.class.getDeclaredField("bookingTime");
+        timeField.setAccessible(true);
+        timeField.set(dto, LocalTime.now());
+
+        Field peopleField = BookingCreateDto.class.getDeclaredField("numberOfPeople");
+        peopleField.setAccessible(true);
+        peopleField.set(dto, 0); // causa error de lógica de negocio
+
+        Price price = Price.create(100.0);
         Route route = mock(Route.class);
-        Price price = mock(Price.class);
-        when(price.getValue()).thenReturn(100.0); // Evita NullPointerException
         when(route.getPrice()).thenReturn(price);
-        when(route.getId()).thenReturn(UUID.randomUUID());
-        when(route.getStartLocation()).thenReturn("City A");
-        when(route.getEndLocation()).thenReturn("City B");
 
-        // Mock de BookingMapperApp para simular el método toBooking
-        BookingMapperApp bookingMapperApp = mock(BookingMapperApp.class);
-
-        // Simular la creación de Booking cuando se llame a toBooking
-        Booking expectedBooking = mock(Booking.class);
-        when(bookingMapperApp.toBooking(dto, route)).thenReturn(expectedBooking);
-
-        // Act
-        Booking booking = bookingMapperApp.toBooking(dto, route);
-
-        // Assert
-        assertNotNull(booking);
-        assertNull(booking.getClientId()); // Este es el valor que pasaste como null
-        assertNotNull(booking.getBookingDate()); // Verifica que la fecha no sea null
-        assertEquals(0, booking.getNumberOfPeople());
+        // Act & Assert
+        assertThrows(BusinessRuleViolationException.class, () -> {
+            bookingMapperApp.toBooking(dto, route);
+        }, "Debe lanzar excepción porque el número de personas es 0");
     }
+
 
 
 

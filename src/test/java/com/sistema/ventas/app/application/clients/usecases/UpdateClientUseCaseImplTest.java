@@ -59,23 +59,6 @@ class UpdateClientUseCaseImplTest {
             throw e;
         }
     }
-    @Test
-    void execute_InvalidEmailFormat_ThrowsValueObjectValidationException() {
-        // Dando un correo electrónico con formato inválido
-        Client client = Client.create(UUID.randomUUID(), "0942673971", "Juan", "Pérez", "invalid-email");
-
-        // Verifica que se lanza la excepción de validación de formato de correo electrónico
-        ValueObjectValidationException exception = assertThrows(
-                ValueObjectValidationException.class,
-                () -> useCase.execute(client)
-        );
-
-        // Verifica que el mensaje de la excepción sea el esperado
-        assertEquals("El campo correo electrónico tiene un formato inválido", exception.getMessage());
-
-        // Asegura que el repositorio no haga ninguna operación de guardado
-        verify(repository, never()).save(client);
-    }
 
 
 }

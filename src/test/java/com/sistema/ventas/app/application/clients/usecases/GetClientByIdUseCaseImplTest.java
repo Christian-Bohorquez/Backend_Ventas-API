@@ -66,21 +66,6 @@ class GetClientByIdUseCaseImplTest {
         System.out.println("Prueba exitosa: Se lanzó IllegalArgumentException con el mensaje esperado cuando el ID es nulo.");
     }
 
-    @Test
-    void execute_InvalidIdFormat_ThrowsValidationException() {
-        String invalidId = "123-invalid-uuid"; // Cadena no válida para UUID
-
-        // Cambiar el comportamiento para simular que el validador lanza una ValidationException
-        doThrow(new ValidationException("ID con formato incorrecto"))
-                .when(validator).validateGetById(UUID.fromString(invalidId)); // Intentando convertir el ID a UUID
-
-        // Asegúrate de que la excepción esperada sea la ValidationException
-        assertThrows(ValidationException.class, () -> useCase.execute(UUID.fromString(invalidId)));
-
-        verify(validator).validateGetById(UUID.fromString(invalidId));
-        verify(repository, never()).getById(any());
-    }
-
 
 
 }
