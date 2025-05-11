@@ -54,11 +54,3 @@ pipeline {
         }
     }
 }
-"""
-
-jenkinsfile_path = "/mnt/data/Backend_Ventas-API-main/Jenkinsfile"
-
-with open(jenkinsfile_path, "w") as f:
-    f.write(jenkinsfile_content)
-
-jenkinsfile_path
