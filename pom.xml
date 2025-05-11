@@ -31,6 +31,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>17</java.version>
 	</properties>
 
@@ -198,9 +199,20 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0-M7</version>
 				<configuration>
-					<includes>
-						<include>**/*Test.java</include>
-					</includes>
+
+				</configuration>
+			</plugin>
+
+			<!-- 📌 Plugin de Resources para manejar la codificación -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>properties</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
 				</configuration>
 			</plugin>
 
