@@ -9,33 +9,32 @@ pipeline {
     environment {
         JAVA_HOME = "${tool 'JDK 21'}"
         MAVEN_HOME = "${tool 'Maven 3.8.1'}"
-        PATH = "${env.JAVA_HOME}/bin:${env.MAVEN_HOME}/bin:${env.PATH}"
+        PATH = "${env.JAVA_HOME}/bin;${env.MAVEN_HOME}/bin;${env.PATH}"
     }
 
     stages {
-
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                bat 'mvn clean install'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
-                sh 'mvn package'
+                bat 'mvn package'
             }
         }
 
         stage('Deploy') {
             steps {
                 echo 'Desplegando aplicación...'
-                sh 'nohup java -jar target/*.jar &'
+                bat 'start /B java -jar target\\*.jar'
             }
         }
     }
