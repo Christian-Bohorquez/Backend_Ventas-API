@@ -22,6 +22,22 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                // Obtener código del repositorio de GitHub
+                checkout([$class: 'GitSCM', 
+                    branches: [[name: 'main']], 
+                    doGenerateSubmoduleConfigurations: false, 
+                    extensions: [], 
+                    submoduleCfg: [], 
+                    userRemoteConfigs: [[
+                        credentialsId: '202ad56b-0965-413b-a661-f05ae4b1890f', 
+                        url: 'https://github.com/Christian-Bohorquez/Backend_Ventas-API.git'
+                    ]]
+                ])
+            }
+        }
+        
         stage('Build') {
             steps {
                 bat 'mvn clean install -DskipTests'
