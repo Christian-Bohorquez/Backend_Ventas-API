@@ -14,11 +14,24 @@ import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
-    @Value("${jwt.secret}")
+
+    private final String jwtSecret;
+    private final long jwtExpirationInMs;
+
+    public JwtTokenProvider(@Value("${jwt.secret}") String jwtSecret,
+                            @Value("${jwt.expiration}") long jwtExpirationInMs) {
+        this.jwtSecret = jwtSecret;
+        this.jwtExpirationInMs = jwtExpirationInMs;
+    }
+
+
+    /*@Value("${jwt.secret}")
     private String jwtSecret;
 
     @Value("${jwt.expiration}")
     private long jwtExpirationInMs;
+
+     */
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);

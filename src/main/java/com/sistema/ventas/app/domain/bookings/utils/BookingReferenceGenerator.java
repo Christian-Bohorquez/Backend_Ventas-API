@@ -16,6 +16,10 @@ public class BookingReferenceGenerator {
     }
 
     private static String generateRandomLetters(int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("El tamaño debe ser positivo");
+        }
+
         StringBuilder letters = new StringBuilder();
         Random random = new Random();
 
@@ -28,6 +32,10 @@ public class BookingReferenceGenerator {
     }
 
     private static String generateRandomNumbers(int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("El tamaño debe ser positivo");
+        }
+
         StringBuilder numbers = new StringBuilder();
         Random random = new Random();
 

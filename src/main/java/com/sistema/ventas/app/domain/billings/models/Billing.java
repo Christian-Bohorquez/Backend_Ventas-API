@@ -50,6 +50,9 @@ public class Billing {
             billingDate = new Date();
             totalPrice = booking.getTotalPrice() * 1.12;
         }
+        if (billingDate.after(new Date())) {
+            throw new BusinessRuleViolationException("No se puede facturar con una fecha futura.");
+        }
 
         return new Billing(
             id != null ? id : UUID.randomUUID(),
