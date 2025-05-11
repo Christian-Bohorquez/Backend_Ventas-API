@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Servicio de la aplicación Spring Boot
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/SistemasVentasDB
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - db
+    networks:
+      - ventas-network
+
+  # Servicio de base de datos MySQL
+  db:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=SistemasVentasDB
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - ventas-network
+
+networks:
+  ventas-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
