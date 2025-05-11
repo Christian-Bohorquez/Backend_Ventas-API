@@ -15,7 +15,20 @@ public class RoleService {
     }
 
     public ResponseAPI createRole(RoleCreateDto dto) {
-        _createRoleUseCase.execute(new Role(dto.getName()));
-        return new ResponseAPI(201, "Rol creado exitosamente");
+        if (dto.getName() == null) {
+            return new ResponseAPI(400, "El nombre del rol no puede ser nulo");
+        }
+
+        if (dto.getName().trim().isEmpty()) {
+            return new ResponseAPI(400, "El nombre del rol no puede estar vacío");
+        }
+
+        try {
+            _createRoleUseCase.execute(new Role(dto.getName()));
+            return new ResponseAPI(201, "Rol creado exitosamente");
+        } catch (IllegalArgumentException e) {
+            return new ResponseAPI(400, e.getMessage());
+        }
     }
+
 }
