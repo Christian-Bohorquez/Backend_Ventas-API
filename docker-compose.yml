@@ -6,7 +6,7 @@ services:
     build: .
     restart: always
     ports:
-      - "8080:8080"
+      - "8090:8080"  # Cambiado a 8090 para evitar conflictos con otros servicios
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/SistemasVentasDB
       - SPRING_DATASOURCE_USERNAME=root
@@ -22,7 +22,7 @@ services:
     image: mysql:8.0
     restart: always
     ports:
-      - "3306:3306"
+      - "3307:3306"  # Cambiado a 3307 para evitar conflictos con MySQL local
     environment:
       - MYSQL_DATABASE=SistemasVentasDB
       - MYSQL_ROOT_PASSWORD=root

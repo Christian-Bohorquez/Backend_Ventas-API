@@ -99,13 +99,13 @@ pipeline {
     post {
         success {
             echo 'Pipeline ejecutado exitosamente.'
-            echo 'La aplicación está disponible en http://localhost:8080'
+            echo 'La aplicación está disponible en http://localhost:8090'
             
             // Notificación por email en caso de éxito
             emailext (
                 subject: "\u2705 Pipeline Exitoso: ${currentBuild.fullDisplayName}",
                 body: """<p>El pipeline de <b>ventas-api</b> se ha ejecutado correctamente.</p>
-                        <p>La aplicación está disponible en <a href="http://localhost:8080">http://localhost:8080</a></p>
+                        <p>La aplicación está disponible en <a href="http://localhost:8090">http://localhost:8090</a></p>
                         <p>Versión de imagen Docker: <b>${DOCKER_IMAGE}:${DOCKER_TAG}</b></p>
                         <p>Ver detalles: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
                 to: emailRecipients,
@@ -117,7 +117,7 @@ pipeline {
                 channel: slackChannel,
                 color: 'good',
                 message: "\u2705 *Pipeline Exitoso:* ${currentBuild.fullDisplayName}\n" +
-                         "La aplicación está disponible en http://localhost:8080\n" +
+                         "La aplicación está disponible en http://localhost:8090\n" +
                          "Versión de imagen Docker: ${DOCKER_IMAGE}:${DOCKER_TAG}\n" +
                          "Ver detalles: ${env.BUILD_URL}"
             )
