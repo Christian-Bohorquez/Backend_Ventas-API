@@ -75,10 +75,21 @@ pipeline {
             steps {
                 script {
                     echo 'Levantando servicios con Docker Compose...'
+                    // Verificar versión de Docker y Docker Compose
+                    bat 'docker --version'
+                    bat 'docker-compose --version'
+                    // Verificar estado actual de Docker
+                    bat 'docker ps'
                     // Detener y eliminar contenedores previos si existen
                     bat 'docker-compose down || true'
-                    // Iniciar los servicios definidos en docker-compose.yml
-                    bat 'docker-compose up -d'
+                    // Mostrar el contenido del archivo docker-compose.yml
+                    bat 'type docker-compose.yml'
+                    // Iniciar los servicios definidos en docker-compose.yml con más información
+                    bat 'docker-compose up -d --verbose'
+                    // Verificar estado de los contenedores después del despliegue
+                    bat 'docker-compose ps'
+                    // Ver logs de la aplicación
+                    bat 'docker-compose logs app'
                 }
             }
         }
