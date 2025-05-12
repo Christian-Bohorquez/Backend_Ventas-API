@@ -169,8 +169,34 @@ pipeline {
             // Limpiar imágenes antiguas para evitar acumulación
             script {
                 echo 'Limpiando imágenes Docker antiguas...'
-                // Mantener solo las últimas 3 versiones de la imagen
-                bat "docker image ls ${DOCKER_IMAGE} --format \"{{.Tag}}\" | sort -r | tail -n +4 | xargs -I {} docker rmi ${DOCKER_IMAGE}:{} || true"
+                // Versión compatible con Windows para limpiar imágenes antiguas
+                bat """
+                    @echo off
+                    REM Listar todas las imágenes y guardar en un archivo temporal
+                    docker image ls ${DOCKER_IMAGE} --format \"{{.Tag}}\" > temp_tags.txt
+                    
+                    REM Contar cuántas imágenes hay
+                    set /a count=0
+                    for /f %%a in (temp_tags.txt) do set /a count+=1
+                    
+                    REM Si hay más de 3 imágenes, eliminar las más antiguas
+                    if %count% gtr 3 (
+                        echo Manteniendo solo las 3 versiones más recientes de la imagen
+                        set /a to_delete=%count%-3
+                        set /a deleted=0
+                        for /f %%a in (temp_tags.txt) do (
+                            if !deleted! lss !to_delete! (
+                                docker rmi ${DOCKER_IMAGE}:%%a
+                                set /a deleted+=1
+                            )
+                        )
+                    ) else (
+                        echo No hay suficientes imágenes antiguas para limpiar
+                    )
+                    
+                    REM Eliminar archivo temporal
+                    del temp_tags.txt
+                """
             }
         }
     }
