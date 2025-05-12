@@ -116,16 +116,21 @@ pipeline {
             echo 'Pipeline ejecutado exitosamente.'
             echo 'La aplicación está disponible en http://localhost:8090'
             
-            // Notificación por email en caso de éxito
-            emailext (
-                subject: "\u2705 Pipeline Exitoso: ${currentBuild.fullDisplayName}",
-                body: """<p>El pipeline de <b>ventas-api</b> se ha ejecutado correctamente.</p>
-                        <p>La aplicación está disponible en <a href="http://localhost:8090">http://localhost:8090</a></p>
-                        <p>Versión de imagen Docker: <b>${DOCKER_IMAGE}:${DOCKER_TAG}</b></p>
-                        <p>Ver detalles: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                to: emailRecipients,
-                mimeType: 'text/html'
-            )
+            // Notificación por email en caso de éxito (con manejo de errores)
+            try {
+                emailext (
+                    subject: "\u2705 Pipeline Exitoso: ${currentBuild.fullDisplayName}",
+                    body: """<p>El pipeline de <b>ventas-api</b> se ha ejecutado correctamente.</p>
+                            <p>La aplicación está disponible en <a href="http://localhost:8090">http://localhost:8090</a></p>
+                            <p>Versión de imagen Docker: <b>${DOCKER_IMAGE}:${DOCKER_TAG}</b></p>
+                            <p>Ver detalles: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+                    to: emailRecipients,
+                    mimeType: 'text/html'
+                )
+            } catch (Exception e) {
+                echo "ADVERTENCIA: No se pudo enviar el correo de notificación: ${e.message}"
+                echo "Esto no afecta el éxito del pipeline"
+            }
             
             // Notificación por Slack en caso de éxito
             slackSend (
@@ -145,15 +150,20 @@ pipeline {
                 bat 'docker-compose down || true'
             }
             
-            // Notificación por email en caso de fallo
-            emailext (
-                subject: "\u274C Pipeline Fallido: ${currentBuild.fullDisplayName}",
-                body: """<p>El pipeline de <b>ventas-api</b> ha fallado.</p>
+            // Notificación por email en caso de fallo (con manejo de errores)
+            try {
+                emailext (
+                    subject: "\u274C Pipeline Fallido: ${currentBuild.fullDisplayName}",
+                    body: """<p>El pipeline de <b>ventas-api</b> ha fallado.</p>
                         <p>Ver detalles del error: <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></p>
                         <p>Ver pipeline completo: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                to: emailRecipients,
-                mimeType: 'text/html'
-            )
+                    to: emailRecipients,
+                    mimeType: 'text/html'
+                )
+            } catch (Exception e) {
+                echo "ADVERTENCIA: No se pudo enviar el correo de notificación: ${e.message}"
+                echo "Continuando con el proceso de notificación"
+            }
             
             // Notificación por Slack en caso de fallo
             slackSend (
