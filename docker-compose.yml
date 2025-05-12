@@ -1,10 +1,16 @@
 # Docker Compose para ventas-api
 # Configuración optimizada para entornos de desarrollo y CI/CD
 
+# Uso de variables de entorno para nombres únicos
+# La variable BUILD_NUMBER es proporcionada por Jenkins
+version: '3'
+name: "ventas-api-${BUILD_NUMBER:-local}"
+
 services:
   # Servicio de la aplicación Spring Boot
   app:
     build: .
+    container_name: "ventas-api-app-${BUILD_NUMBER:-local}"
     restart: always
     ports:
       - "8090:8080"  # Cambiado a 8090 para evitar conflictos con otros servicios
@@ -21,6 +27,7 @@ services:
   # Servicio de base de datos MySQL
   db:
     image: mysql:8.0
+    container_name: "ventas-api-db-${BUILD_NUMBER:-local}"
     restart: always
     ports:
       - "3307:3306"  # Cambiado a 3307 para evitar conflictos con MySQL local

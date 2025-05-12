@@ -18,6 +18,18 @@ pipeline {
     }
 
     stages {
+        stage('Cleanup') {
+            steps {
+                script {
+                    echo 'Limpiando entorno para evitar conflictos...'
+                    // Detener y eliminar contenedores existentes para evitar conflictos
+                    bat 'docker-compose down --remove-orphans || true'
+                    // Verificar que no haya contenedores usando los puertos necesarios
+                    bat 'docker ps'
+                }
+            }
+        }
+        
         stage('Checkout') {
             steps {
                 // Obtener código del repositorio de GitHub
