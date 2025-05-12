@@ -1,4 +1,5 @@
-version: '3.8'
+# Docker Compose para ventas-api
+# Configuración optimizada para entornos de desarrollo y CI/CD
 
 services:
   # Servicio de la aplicación Spring Boot

@@ -84,8 +84,8 @@ pipeline {
                     bat 'docker-compose down || true'
                     // Mostrar el contenido del archivo docker-compose.yml
                     bat 'type docker-compose.yml'
-                    // Iniciar los servicios definidos en docker-compose.yml con más información
-                    bat 'docker-compose up -d --verbose'
+                    // Iniciar los servicios definidos en docker-compose.yml
+                    bat 'docker-compose up -d'
                     // Verificar estado de los contenedores después del despliegue
                     bat 'docker-compose ps'
                     // Ver logs de la aplicación
