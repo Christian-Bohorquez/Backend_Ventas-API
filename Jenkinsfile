@@ -98,10 +98,14 @@ pipeline {
             steps {
                 script {
                     echo 'Verificando despliegue...'
-                    // Esperar a que la aplicación esté disponible
-                    bat 'timeout /t 30 /nobreak'
+                    // Esperar a que la aplicación esté disponible (usando ping como alternativa a timeout)
+                    bat 'ping -n 30 127.0.0.1 > nul'
                     // Verificar que los contenedores estén en ejecución
                     bat 'docker ps'
+                    // Verificar el estado de los contenedores de Docker Compose
+                    bat 'docker-compose ps'
+                    // Verificar los logs de la aplicación para diagnosticar problemas
+                    bat 'docker-compose logs app --tail=50'
                 }
             }
         }
