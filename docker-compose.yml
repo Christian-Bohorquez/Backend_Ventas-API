@@ -8,7 +8,7 @@ services:
     ports:
       - "8090:8080"  # Cambiado a 8090 para evitar conflictos con otros servicios
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/SistemasVentasDB
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sistemasventasdb
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
@@ -24,7 +24,7 @@ services:
     ports:
       - "3307:3306"  # Cambiado a 3307 para evitar conflictos con MySQL local
     environment:
-      - MYSQL_DATABASE=SistemasVentasDB
+      - MYSQL_DATABASE=sistemasventasdb
       - MYSQL_ROOT_PASSWORD=root
     volumes:
       - mysql-data:/var/lib/mysql

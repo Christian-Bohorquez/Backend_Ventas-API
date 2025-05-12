@@ -3,7 +3,7 @@ def emailRecipients = 'valentinapinto002@gmail.com, mau162002@hotmail.com'
 def slackChannel = '#ci-cd-notificaciones'
 
 // URL del webhook de GitHub configurada en ngrok
-def webhookUrl = 'https://dec2-179-60-52-11.ngrok-free.app/github-webhook/'
+def webhookUrl = 'https://2da9-190-110-47-81.ngrok-free.app/github-webhook/'
 
 pipeline {
     agent any
