@@ -1,9 +1,5 @@
-// Configuración de destinatarios para notificaciones
-def emailRecipients = 'valentinapinto002@gmail.com, mau162002@hotmail.com'
-def slackChannel = '#ci-cd-notificaciones'
-
-// URL del webhook de GitHub configurada en ngrok
-def webhookUrl = 'https://2da9-190-110-47-81.ngrok-free.app/github-webhook/'
+// Nota: La configuración de correo electrónico se gestiona directamente en Jenkins
+// con el template 'email-jenkins' y la cuenta mau282002@gmail.com
 
 pipeline {
     agent any
@@ -116,33 +112,8 @@ pipeline {
             echo 'Pipeline ejecutado exitosamente.'
             echo 'La aplicación está disponible en http://localhost:8090'
             
-            // Notificación por email en caso de éxito (con manejo de errores)
-            script {
-                try {
-                    emailext (
-                        subject: "\u2705 Pipeline Exitoso: ${currentBuild.fullDisplayName}",
-                        body: """<p>El pipeline de <b>ventas-api</b> se ha ejecutado correctamente.</p>
-                                <p>La aplicación está disponible en <a href="http://localhost:8090">http://localhost:8090</a></p>
-                                <p>Versión de imagen Docker: <b>${DOCKER_IMAGE}:${DOCKER_TAG}</b></p>
-                                <p>Ver detalles: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                        to: emailRecipients,
-                        mimeType: 'text/html'
-                    )
-                } catch (Exception e) {
-                    echo "ADVERTENCIA: No se pudo enviar el correo de notificación: ${e.message}"
-                    echo "Esto no afecta el éxito del pipeline"
-                }
-            }
-            
-            // Notificación por Slack en caso de éxito
-            slackSend (
-                channel: slackChannel,
-                color: 'good',
-                message: "\u2705 *Pipeline Exitoso:* ${currentBuild.fullDisplayName}\n" +
-                         "La aplicación está disponible en http://localhost:8090\n" +
-                         "Versión de imagen Docker: ${DOCKER_IMAGE}:${DOCKER_TAG}\n" +
-                         "Ver detalles: ${env.BUILD_URL}"
-            )
+            // Las notificaciones por correo se gestionan directamente por Jenkins
+            // usando el template configurado 'email-jenkins'
         }
         
         failure {
@@ -152,31 +123,8 @@ pipeline {
                 bat 'docker-compose down || true'
             }
             
-            // Notificación por email en caso de fallo (con manejo de errores)
-            script {
-                try {
-                    emailext (
-                        subject: "\u274C Pipeline Fallido: ${currentBuild.fullDisplayName}",
-                        body: """<p>El pipeline de <b>ventas-api</b> ha fallado.</p>
-                            <p>Ver detalles del error: <a href="${env.BUILD_URL}console">${env.BUILD_URL}console</a></p>
-                            <p>Ver pipeline completo: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                        to: emailRecipients,
-                        mimeType: 'text/html'
-                    )
-                } catch (Exception e) {
-                    echo "ADVERTENCIA: No se pudo enviar el correo de notificación: ${e.message}"
-                    echo "Continuando con el proceso de notificación"
-                }
-            }
-            
-            // Notificación por Slack en caso de fallo
-            slackSend (
-                channel: slackChannel,
-                color: 'danger',
-                message: "\u274C *Pipeline Fallido:* ${currentBuild.fullDisplayName}\n" +
-                         "Ver detalles del error: ${env.BUILD_URL}console\n" +
-                         "Ver pipeline completo: ${env.BUILD_URL}"
-            )
+            // Las notificaciones por correo se gestionan directamente por Jenkins
+            // usando el template configurado 'email-jenkins'
         }
         
         always {
