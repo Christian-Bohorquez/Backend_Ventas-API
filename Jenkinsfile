@@ -11,7 +11,7 @@ pipeline {
 
     environment {
         JAVA_HOME = "${tool 'JDK 21'}"
-        MAVEN_HOME = "${tool 'Maven 3.8.1'}"
+        MAVEN_HOME = "${tool 'Maven 3.8.8'}"
         PATH = "${env.JAVA_HOME}/bin;${env.MAVEN_HOME}/bin;${env.PATH}"
         DOCKER_IMAGE = "ventas-api"
         DOCKER_TAG = "${env.BUILD_NUMBER}"
