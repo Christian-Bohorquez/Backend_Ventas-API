@@ -32,6 +32,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Obtener código del repositorio de GitHub
+
                 checkout([$class: 'GitSCM', 
                     branches: [[name: 'main']], 
                     doGenerateSubmoduleConfigurations: false, 
