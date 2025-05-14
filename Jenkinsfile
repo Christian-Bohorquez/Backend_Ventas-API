@@ -1,6 +1,3 @@
-// Nota: La configuración de correo electrónico se gestiona directamente en Jenkins
-// con el template 'email-jenkins' y la cuenta mau282002@gmail.com
-
 pipeline {
     agent any
 
@@ -11,7 +8,7 @@ pipeline {
 
     environment {
         JAVA_HOME = "${tool 'JDK 21'}"
-        MAVEN_HOME = "${tool 'Maven 3.8.1'}"
+        MAVEN_HOME = "${tool 'Maven 3.8.8'}"
         PATH = "${env.JAVA_HOME}/bin:${env.MAVEN_HOME}/bin:${env.PATH}"
         DOCKER_IMAGE = "ventas-api"
         DOCKER_TAG = "${env.BUILD_NUMBER}"
@@ -103,6 +100,27 @@ pipeline {
                 }
             }
         }
+
+        //  Nuevo stage para limpieza de imágenes
+        stage('Cleanup Docker Images') {
+            steps {
+                script {
+                    echo 'Limpiando imágenes Docker antiguas...'
+                    sh '''
+                        TAGS=$(docker image ls ${DOCKER_IMAGE} --format "{{.Tag}}" | grep -v latest | sort -r)
+                        COUNT=$(echo "$TAGS" | wc -l)
+                        if [ "$COUNT" -gt 3 ]; then
+                            echo "Eliminando imágenes antiguas..."
+                            echo "$TAGS" | tail -n +4 | while read TAG; do
+                                docker rmi ${DOCKER_IMAGE}:$TAG || true
+                            done
+                        else
+                            echo "No hay suficientes imágenes para limpiar."
+                        fi
+                    '''
+                }
+            }
+        }
     }
 
     post {
@@ -115,24 +133,6 @@ pipeline {
             echo 'Falló el pipeline.'
             script {
                 sh 'docker-compose down || true'
-            }
-        }
-
-        always {
-            script {
-                echo 'Limpiando imágenes Docker antiguas...'
-                sh '''
-                    TAGS=$(docker image ls ${DOCKER_IMAGE} --format "{{.Tag}}" | grep -v latest | sort -r)
-                    COUNT=$(echo "$TAGS" | wc -l)
-                    if [ "$COUNT" -gt 3 ]; then
-                        echo "Eliminando imágenes antiguas..."
-                        echo "$TAGS" | tail -n +4 | while read TAG; do
-                            docker rmi ${DOCKER_IMAGE}:$TAG || true
-                        done
-                    else
-                        echo "No hay suficientes imágenes para limpiar."
-                    fi
-                '''
             }
         }
     }
