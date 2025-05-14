@@ -5,18 +5,17 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.8.1'
-        jdk 'JDK 21'
-    }
+            maven 'Maven 3.8.1' // Declara la herramienta Maven con la versión 3.8.1
+            jdk 'JDK 21'        // Declara el JDK (Java Development Kit) versión 21
+        }
 
-    environment {
-        JAVA_HOME = "${tool 'JDK 21'}"
-        MAVEN_HOME = "${tool 'Maven 3.8.1'}"
-        PATH = "${env.JAVA_HOME}/bin;${env.MAVEN_HOME}/bin;${env.PATH}"
-        DOCKER_IMAGE = "ventas-api"
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
-    }
-
+        environment {
+            JAVA_HOME = "${tool 'JDK 21'}"          // Establece la variable de entorno JAVA_HOME con la ruta al JDK 21
+            MAVEN_HOME = "${tool 'Maven 3.8.1'}"    // Establece MAVEN_HOME con la ruta al Maven 3.8.1
+            PATH = "${env.JAVA_HOME}/bin;${env.MAVEN_HOME}/bin;${env.PATH}" // Añade los binarios de Java y Maven al PATH del sistema
+            DOCKER_IMAGE = "ventas-api"             // Nombre de la imagen Docker a generar
+            DOCKER_TAG = "${env.BUILD_NUMBER}"      // Etiqueta (tag) de la imagen Docker, usando el número de build de Jenkins
+        }
     stages {
         stage('Cleanup') {
             steps {
