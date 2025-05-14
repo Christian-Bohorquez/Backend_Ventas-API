@@ -5,7 +5,7 @@ pipeline {
     agent any
 
     tools {
-            maven 'Maven 3.8.1' // Declara la herramienta Maven con la versión 3.8.1
+            maven 'Maven 3.8.1' //  herramienta Maven con la versión 3.8.1
             jdk 'JDK 21'        // Declara el JDK (Java Development Kit) versión 21
         }
 
