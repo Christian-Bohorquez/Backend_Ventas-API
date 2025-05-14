@@ -28,7 +28,6 @@ pipeline {
                 }
             }
         }
-        
         stage('Checkout') {
             steps {
                 // Obtener código del repositorio de GitHub
