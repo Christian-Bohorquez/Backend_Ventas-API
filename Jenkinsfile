@@ -48,9 +48,9 @@ pipeline {
                     // Detiene y elimina todos los contenedores definidos en docker-compose.yml
                     // La opción --remove-orphans elimina también contenedores huérfanos
                     // || true asegura que el pipeline continúe incluso si no hay contenedores para detener
-                    sh 'docker-compose down --remove-orphans || true'
+                    bat 'docker-compose down --remove-orphans || true'
                     // Muestra los contenedores en ejecución para verificar que se hayan detenido
-                    sh 'docker ps'
+                    bat 'docker ps'
                 }
             }
         }
@@ -87,7 +87,7 @@ pipeline {
             steps {
                 // Ejecuta Maven para limpiar, compilar e instalar las dependencias
                 // -DskipTests omite la ejecución de pruebas en esta fase
-                sh 'mvn clean install -DskipTests'
+                bat 'mvn clean install -DskipTests'
             }
         }
 
@@ -99,7 +99,7 @@ pipeline {
         stage('Test') {
             steps {
                 // Ejecuta las pruebas unitarias y de integración con Maven
-                sh 'mvn test'
+                bat 'mvn test'
             }
             // Acciones a realizar después de la etapa de pruebas
             post {
@@ -120,7 +120,7 @@ pipeline {
         stage('Package') {
             steps {
                 // Crea el archivo JAR sin ejecutar pruebas nuevamente
-                sh 'mvn package -DskipTests'
+                bat 'mvn package -DskipTests'
             }
         }
 
@@ -135,9 +135,9 @@ pipeline {
                     echo 'Construyendo imagen Docker...'
                     // Construye la imagen Docker con un tag basado en el número de build
                     // Esto permite tener un historial de versiones de la imagen
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
                     // También etiqueta la imagen como 'latest' para facilitar referencias
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -152,20 +152,20 @@ pipeline {
                 script {
                     echo 'Levantando servicios con Docker Compose...'
                     // Verifica las versiones de Docker y Docker Compose instaladas
-                    sh 'docker --version'
-                    sh 'docker-compose --version'
+                    bat 'docker --version'
+                    bat 'docker-compose --version'
                     // Muestra los contenedores en ejecución antes del despliegue
-                    sh 'docker ps'
+                    bat 'docker ps'
                     // Detiene contenedores previos si existen
-                    sh 'docker-compose down || true'
+                    bat 'docker-compose down || true'
                     // Muestra el contenido del archivo docker-compose.yml para diagnóstico
-                    sh 'cat docker-compose.yml'
+                    bat 'cat docker-compose.yml'
                     // Inicia los servicios en modo detached (en segundo plano)
-                    sh 'docker-compose up -d'
+                    bat 'docker-compose up -d'
                     // Verifica el estado de los servicios después del despliegue
-                    sh 'docker-compose ps'
+                    bat 'docker-compose ps'
                     // Muestra los logs de la aplicación para diagnóstico
-                    sh 'docker-compose logs app || true'
+                    bat 'docker-compose logs app || true'
                 }
             }
         }
@@ -180,13 +180,13 @@ pipeline {
                 script {
                     echo 'Verificando despliegue...'
                     // Espera 30 segundos para dar tiempo a que la aplicación se inicialice completamente
-                    sh 'sleep 30'
+                    bat 'ping -n 30 127.0.0.1 > nul'
                     // Verifica los contenedores en ejecución
-                    sh 'docker ps'
+                    bat 'docker ps'
                     // Verifica el estado de los servicios de Docker Compose
-                    sh 'docker-compose ps'
+                    bat 'docker-compose ps'
                     // Muestra las últimas 50 líneas de logs de la aplicación para verificar su estado
-                    sh 'docker-compose logs app --tail=50 || true'
+                    bat 'docker-compose logs app --tail=50 || true'
                 }
             }
         }
@@ -200,22 +200,35 @@ pipeline {
             steps {
                 script {
                     echo 'Limpiando imágenes Docker antiguas...'
-                    // Script de shell para gestionar la limpieza de imágenes
-                    sh '''
-                        # Obtiene todos los tags de la imagen, excluyendo 'latest', ordenados del más reciente al más antiguo
-                        TAGS=$(docker image ls ${DOCKER_IMAGE} --format "{{.Tag}}" | grep -v latest | sort -r)
-                        # Cuenta cuántos tags hay
-                        COUNT=$(echo "$TAGS" | wc -l)
-                        # Si hay más de 3 imágenes, elimina las más antiguas
-                        if [ "$COUNT" -gt 3 ]; then
-                            echo "Eliminando imágenes antiguas..."
-                            # Toma todos los tags excepto los 3 primeros y los elimina
-                            echo "$TAGS" | tail -n +4 | while read TAG; do
-                                docker rmi ${DOCKER_IMAGE}:$TAG || true
-                            done
-                        else
-                            echo "No hay suficientes imágenes para limpiar."
-                        fi
+                    // Script de batch para Windows para gestionar la limpieza de imágenes
+                    bat '''
+                        @echo off
+                        REM Listar todas las imágenes y guardar en un archivo temporal
+                        docker image ls ${DOCKER_IMAGE} --format "{{.Tag}}" > temp_tags.txt
+                        
+                        REM Contar cuántas imágenes hay
+                        set /a count=0
+                        for /f %%a in (temp_tags.txt) do set /a count+=1
+                        
+                        REM Si hay más de 3 imágenes, eliminar las más antiguas
+                        if %count% gtr 3 (
+                            echo Manteniendo solo las 3 versiones más recientes de la imagen
+                            set /a to_delete=%count%-3
+                            set /a deleted=0
+                            for /f %%a in (temp_tags.txt) do (
+                                if !deleted! lss !to_delete! (
+                                    if not "%%a"=="latest" (
+                                        docker rmi ${DOCKER_IMAGE}:%%a
+                                        set /a deleted+=1
+                                    )
+                                )
+                            )
+                        ) else (
+                            echo No hay suficientes imágenes para limpiar
+                        )
+                        
+                        REM Eliminar archivo temporal
+                        del temp_tags.txt
                     '''
                 }
             }
@@ -240,7 +253,7 @@ pipeline {
             script {
                 // En caso de fallo, asegurarse de que todos los contenedores se detengan
                 // para liberar recursos y evitar conflictos en futuras ejecuciones
-                sh 'docker-compose down || true'
+                bat 'docker-compose down || true'
                 // Nota: Aquí podrían agregarse notificaciones de error o acciones de recuperación
             }
         }
