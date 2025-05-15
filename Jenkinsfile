@@ -159,7 +159,7 @@ pipeline {
                     // Detiene contenedores previos si existen
                     bat 'docker-compose down || true'
                     // Muestra el contenido del archivo docker-compose.yml para diagnóstico
-                    bat 'cat docker-compose.yml'
+                    bat 'type docker-compose.yml'
                     // Inicia los servicios en modo detached (en segundo plano)
                     bat 'docker-compose up -d'
                     // Verifica el estado de los servicios después del despliegue
